@@ -49,5 +49,9 @@ class Task:
 
     def describe(self):
         print(f"Task name: {self.task_name}")
-        print(f"Task deadline: {self.deadline.format('YYYY-MM-DD HH:mm')}")
-        print(f"Time until deadline: {self.deadline.diff_for_humans()}")
+        print(f"Task deadline: {self.deadline.format('YYYY/MM/DD HH:mm')}")
+        deadline_diff = self.deadline.diff_for_humans()
+        if self.is_active:
+            print(f"Time until deadline: {deadline_diff}")
+        else:
+            print(f"Past due: {deadline_diff}")
