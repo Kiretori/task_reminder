@@ -8,15 +8,24 @@ TASK_DESCRIPTION_MAX_LEN = 256
 class Task:
     task_id: str
     is_active: bool
+    last_reminder_date: pendulum.Date | None
 
-    def __init__(self, task_name: str, task_description: str, deadline: pendulum.DateTime):
-        now = pendulum.now(pendulum.local_timezone())
-
+    def __init__(
+        self,
+        task_name: str,
+        task_description: str,
+        deadline: pendulum.DateTime,
+        last_reminder_date: pendulum.DateTime | None = None,
+    ):
         self.task_name = task_name
         self.task_description = task_description
         self.deadline = deadline
-        self.is_active = True if deadline > now else False
+        if deadline > pendulum.now("local"):
+            self.is_active = True
+        else:
+            self.is_active = False
         self.task_id = self.generate_id()
+        self.last_reminder_date = last_reminder_date
 
     @property
     def task_name(self) -> str:
@@ -25,7 +34,6 @@ class Task:
     @property
     def task_description(self) -> str:
         return self._task_description
-
 
     @task_name.setter
     def task_name(self, task_name: str):
@@ -42,9 +50,7 @@ class Task:
         self._task_description = task_description
 
     def generate_id(self) -> str:
-        hash_input = (
-            f"{self.task_name}{self.deadline}"
-        ).encode()
+        hash_input = (f"{self.task_name}{self.deadline}").encode()
         return hashlib.md5(hash_input).hexdigest()[:8]
 
     def describe(self):
