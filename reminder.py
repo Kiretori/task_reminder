@@ -6,7 +6,8 @@ from sqlite3 import connect
 import time
 import pendulum
 
-CHECK_INTERVAL = 60 # Change to longer interval later
+CHECK_INTERVAL = 60  # Change to longer interval later
+
 
 class Reminder:
     tasklist: List[Task]
@@ -21,7 +22,8 @@ class Reminder:
             self.check_reminders()
             time.sleep(CHECK_INTERVAL)
 
-    def check_reminders(self):
+    def check_reminders(self) -> List[Task] | None:
+        tasks_to_be_reminded = []
         today = pendulum.today()
         today_morning = today.add(hours=8)
         if pendulum.now("local") < today_morning:
@@ -36,8 +38,10 @@ class Reminder:
             last_reminder_date = task.last_reminder_date
 
             if (last_reminder_date is None) or (last_reminder_date < today.date()):
-                logger.info(f"Sending reminder email for task: {task.task_name}")
-                # TODO: implement email sender
+                logger.info(
+                    f"{task.task_name} added to list of tasks to be reminded of."
+                )
+                tasks_to_be_reminded.append(task)
                 task.last_reminder_date = today
 
                 with connect(DB_PATH) as conn:
@@ -54,6 +58,8 @@ class Reminder:
                     """,
                         (task.last_reminder_date.to_date_string(), task.task_id),
                     )
+
+        return tasks_to_be_reminded
 
     def _sync_is_active(self, task: Task):
         with connect(DB_PATH) as conn:
