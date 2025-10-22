@@ -4,6 +4,7 @@ from email.mime.text import MIMEText
 from dotenv import load_dotenv
 from typing import List
 from models import Task
+from loguru import logger
 import os
 import pendulum
 
@@ -33,6 +34,10 @@ class EmailNotifier:
         if password is None:
             raise EnvironmentError("Environment variable PASSWORD is not set.")
 
+        self.smtp_server = smtp_server
+        self.smtp_port = int(smtp_port)
+        self.sender = sender
+        self.password = password
         self.recipients = recipients
         self.tasklist = sorted(tasklist, key=lambda task: task.deadline)
 
@@ -70,6 +75,10 @@ class EmailNotifier:
         return html
 
     def send_email(self):
+        if self.tasklist is None or self.tasklist == []:
+            logger.info("No e-mail has been sent, no tasks to be reminded of.")
+            return
+
         msg = MIMEMultipart("alternative")
         msg["Subject"] = (
             f"Task Reminder - {pendulum.now('local').to_formatted_date_string()}"
@@ -85,31 +94,4 @@ class EmailNotifier:
             server.login(self.sender, self.password)
             server.send_message(msg, from_addr=self.sender, to_addrs=self.recipients)
 
-        print("Secure HTML email sent!")
-
-
-if __name__ == "__main__":
-    notifier = EmailNotifier(
-        "test",
-        [
-            Task(
-                "test1",
-                "desc1",
-                pendulum.DateTime(2025, 12, 12, 0, 0, tzinfo=pendulum.local_timezone()),
-            ),
-            Task(
-                "test2",
-                "desc2",
-                pendulum.DateTime(2025, 11, 12, 0, 0, tzinfo=pendulum.local_timezone()),
-            ),
-            Task(
-                "test3",
-                "desc3",
-                pendulum.DateTime(2025, 12, 31, 0, 0, tzinfo=pendulum.local_timezone()),
-            ),
-        ],
-    )
-
-    html = notifier._generate_html()
-
-    print(html)
+        print("Email sent!")

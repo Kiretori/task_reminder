@@ -1,7 +1,4 @@
-import pendulum
 from loguru import logger
-from models import Task
-from serializer import Serializer
 from task_manager import start_task_manager
 from reminder import Reminder
 import sys
@@ -18,10 +15,16 @@ if __name__ == "__main__":
     mode = args[1]
 
     if mode == "reminder":
-        reminder = Reminder()
-        reminder.start_reminder()
+        try:
+            reminder = Reminder()
+            reminder.start_reminder()
+        except Exception as e:
+            logger.exception(e)
     elif mode == "manager":
-        start_task_manager()
+        try:
+            start_task_manager()
+        except Exception as e:
+            logger.exception(e)
     else:
         print("Invalid mode.")
         exit(1)

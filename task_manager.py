@@ -29,7 +29,7 @@ def add_task():
     try:
         deadline = parse_deadline(deadline_str)
     except Exception as e:
-        logger.error(e)
+        logger.exception(e)
         return
 
     s.save(Task(task_name, task_description, deadline))

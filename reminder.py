@@ -3,6 +3,7 @@ from models import Task
 from typing import List
 from loguru import logger
 from sqlite3 import connect
+from email_notifier import EmailNotifier
 import time
 import pendulum
 
@@ -19,7 +20,9 @@ class Reminder:
     def start_reminder(self):
         while True:
             self.tasklist = self.s.load()
-            self.check_reminders()
+            tasks = self.check_reminders()
+            email_notifier = EmailNotifier(["touyar.wassim2003@gmail.com"], tasks)
+            email_notifier.send_email()
             time.sleep(CHECK_INTERVAL)
 
     def check_reminders(self) -> List[Task] | None:
