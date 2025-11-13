@@ -25,13 +25,13 @@ class Reminder:
             email_notifier.send_email()
             time.sleep(CHECK_INTERVAL)
 
-    def check_reminders(self) -> List[Task] | None:
+    def check_reminders(self) -> List[Task]:
         tasks_to_be_reminded = []
         today = pendulum.today()
         today_morning = today.add(hours=8)
         if pendulum.now("local") < today_morning:
             logger.info("Too early to send reminders.")
-            return
+            return []
 
         for task in self.tasklist:
             if not task.is_active:

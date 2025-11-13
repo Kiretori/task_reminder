@@ -35,7 +35,12 @@ class EmailNotifier:
             raise EnvironmentError("Environment variable PASSWORD is not set.")
 
         self.smtp_server = smtp_server
-        self.smtp_port = int(smtp_port)
+        try:
+            self.smtp_port = int(smtp_port)
+        except ValueError:
+            logger.error(
+                f"SMTP_PORT environment variable cannot be parsed as an int ({smtp_port})"
+            )
         self.sender = sender
         self.password = password
         self.recipients = recipients
